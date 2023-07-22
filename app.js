@@ -6,8 +6,12 @@ var logger = require("morgan");
 const cors = require("cors");
 const helmet = require("helmet");
 
-var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
+const databaseConnection = require("./config/dbConnect");
+
+var indexRouter = require("./routes/index.route");
+var usersRouter = require("./routes/users.route");
+
+databaseConnection();
 
 var app = express();
 

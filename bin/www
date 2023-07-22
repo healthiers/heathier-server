@@ -7,16 +7,16 @@
 var app = require("../app");
 var debug = require("debug")("healthiers:server");
 var http = require("http");
-const dotenv = require("dotenv");
-dotenv.config();
+const config = require("../config/config");
+const PORT = config.PORT;
 
 /**
  * Get port from environment and store in Express.
  */
 
-console.log("port", { port: process.env.PORT });
+console.log("port", { port: PORT });
 
-var port = normalizePort(process.env.PORT || "3000");
+var port = normalizePort(PORT || "3000");
 app.set("port", port);
 
 /**
