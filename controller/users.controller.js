@@ -1,6 +1,11 @@
 const { validationResult } = require("express-validator");
 const { generateValidationErrorMessage } = require("../utils/index");
-const { createUser } = require("../libs/users/users.lib");
+const {
+  createUser,
+  loginUser,
+  saveUserNftdetails,
+} = require("../libs/users/users.lib");
+const { CustomError } = require("../utils/customError");
 
 exports.createUser = async (req, res, next) => {
   try {
@@ -10,7 +15,7 @@ exports.createUser = async (req, res, next) => {
       const message = generateValidationErrorMessage({
         validationErrorArr: errors.array(),
       });
-      res.status(400).json({ error: { ErrorMessage: message } });
+      res.status(400).json({ error: { msg: message } });
       return;
     }
     const {
@@ -22,8 +27,6 @@ exports.createUser = async (req, res, next) => {
       medicalHistory,
       walletAddress,
     } = req.body;
-
-    const newWallet = walletAddress ? walletAddress : "";
 
     const newUser = await createUser({
       fullName,
@@ -37,6 +40,87 @@ exports.createUser = async (req, res, next) => {
 
     res.status(200).json({ data: newUser });
   } catch (e) {
-    res.status(400).json({ error: { ErrorMessage: e.message } });
+    if (e instanceof CustomError) {
+      const { statusCode, message } = e;
+      res.status(statusCode).json({ error: { msg: message } });
+      return;
+    }
+    res.status(400).json({ error: { msg: e.message } });
+  }
+};
+
+exports.loginUser = async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      const message = generateValidationErrorMessage({
+        validationErrorArr: errors.array(),
+      });
+      res.status(400).json({ error: { msg: message } });
+      return;
+    }
+    const { email, password } = req.body;
+
+    const newUser = await loginUser({
+      email,
+      password,
+    });
+
+    res.status(200).json({ data: newUser });
+  } catch (e) {
+    if (e instanceof CustomError) {
+      const { statusCode, message } = e;
+      res.status(statusCode).json({ error: { msg: message } });
+      return;
+    }
+    res.status(400).json({ error: { msg: e.message } });
+  }
+};
+
+exports.saveUserNftDetails = async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      const message = generateValidationErrorMessage({
+        validationErrorArr: errors.array(),
+      });
+      res.status(400).json({ error: { msg: message } });
+      return;
+    }
+
+    const userId = req.userId;
+    const {
+      medicalHistory,
+      medication,
+      symptoms,
+      dietPreference,
+      allergies,
+      goals,
+      isPublic,
+      isNftVisible,
+    } = req.body;
+
+    const user = await saveUserNftdetails({
+      medicalHistory,
+      medication,
+      symptoms,
+      dietPreference,
+      allergies,
+      goals,
+      isPublic,
+      isNftVisible,
+      userId,
+    });
+
+    res.status(200).json({ data: user });
+  } catch (e) {
+    if (e instanceof CustomError) {
+      const { statusCode, message } = e;
+      res.status(statusCode).json({ error: { msg: message } });
+      return;
+    }
+    res.status(400).json({ error: { msg: e.message } });
   }
 };
